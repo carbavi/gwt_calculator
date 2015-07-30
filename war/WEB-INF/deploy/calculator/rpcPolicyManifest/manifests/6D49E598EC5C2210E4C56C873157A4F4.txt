@@ -1,0 +1,2 @@
+serviceClass: com.carbavi.calculator.client.services.BinaryTransformerService
+path: 0B5243835BC1D339CB375AC176E9087D.gwt.rpc
