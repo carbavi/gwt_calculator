@@ -5,23 +5,14 @@ import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
-import javax.persistence.EntityExistsException;
-import javax.persistence.TransactionRequiredException;
-
-import org.apache.log4j.Logger;
 
 import com.carbavi.calculator.server.persistence.PMF;
 import com.carbavi.calculator.server.services.OperationDaoService;
 import com.carbavi.calculator.shared.Operation;
-import com.google.appengine.tools.admin.AppAdminFactory.PasswordPrompt;
-import com.ibm.icu.util.BytesTrie.Iterator;
 
 public class OperationDaoServiceImpl implements OperationDaoService {
 	
-	private static final Logger LOGGER = Logger.getLogger(OperationDaoServiceImpl.class);
-	private static final String ERROR_MSG_PERSIST = "Error saving Operation in DataStore";
-	private static final String ERROR_MSG_LIST = "Error listing Operations from DataStore";
-	private static final String ERROR_MSG_DELETE = "Error deleting Operation from DataStore";
+
 	
 	/**
 	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.save(Operation)}
@@ -31,13 +22,21 @@ public class OperationDaoServiceImpl implements OperationDaoService {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
 			pm.makePersistent(operation);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			LOGGER.warn(ERROR_MSG_PERSIST, ex);
 		} finally {
 			pm.close();
 		}
 	}
+	
+	@Override
+	public Operation saveOperation(Operation operation) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			Operation newOp = (Operation) pm.makePersistent(operation);
+			return pm.detachCopy(newOp);
+		} finally {
+			pm.close();
+		}
+	}	
 
 	/**
 	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.delete(Operation)}
@@ -52,9 +51,6 @@ public class OperationDaoServiceImpl implements OperationDaoService {
 			List<Operation> list_tmp = (List<Operation>) q.execute();
 			// Objects detached to avoid serialization problems with Dates
 			list.addAll(pm.detachCopyAll(list_tmp));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			LOGGER.warn(ERROR_MSG_PERSIST, ex);
 		} finally {
 			pm.close();
 		}
@@ -65,18 +61,28 @@ public class OperationDaoServiceImpl implements OperationDaoService {
 	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.list()}
 	 */
 	@Override
-	public boolean delete(Operation operation) {
+	public Boolean delete(Long id) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			pm.deletePersistent(operation);
-			return true;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			LOGGER.warn(ERROR_MSG_PERSIST, ex);
+			//Object obj = pm.getObjectById(id);
+			Operation op = pm.getObjectById(Operation.class, id);
+			pm.deletePersistent(op);
+			return Boolean.TRUE;
 		} finally {
 			pm.close();
 		}
-		return false;
 	}
+	
+	@Override
+	public Boolean delete(Operation op) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			pm.getObjectById(Operation.class, op.getId());
+			pm.deletePersistent(op);
+			return Boolean.TRUE;
+		} finally {
+			pm.close();
+		}
+	}	
 
 }

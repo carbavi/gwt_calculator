@@ -12,14 +12,16 @@ public interface OperationDaoService {
 	 * @param operation to be saved
 	 */
 	void save(Operation operation);
+	Operation saveOperation(Operation operation);
 	
 	/**
 	 * Deletes an {@code Operation} from the DataStore
 	 * 
-	 * @param operation
+	 * @param id identifier of the Operation to be deleted
 	 * @return {@literal true} if deleted successfully, {@literal false} otherwise
 	 */
-	boolean delete(Operation operation);
+	Boolean delete(Long id);
+	Boolean delete(Operation op);
 	
 	/**
 	 * Returns the full list of {@code Operations} stored in the DataStore

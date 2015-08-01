@@ -1,7 +1,5 @@
 package com.carbavi.calculator.client;
 
-import java.util.List;
-
 import com.carbavi.calculator.client.services.BinaryTransformerService;
 import com.carbavi.calculator.client.services.BinaryTransformerServiceAsync;
 import com.carbavi.calculator.shared.Operation;
@@ -17,7 +15,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.widget.client.TextButton;
-import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 
@@ -29,11 +26,8 @@ public class Calculator implements EntryPoint {
 	// Remote services
 	private final BinaryTransformerServiceAsync binaryService = GWT.create(BinaryTransformerService.class);
 	// Properties to create the Operations table
-	private static final OperationProperties props = GWT.create(OperationProperties.class);
-	// Where Operations table metadata is stored
-	private ListStore<Operation> store;
-	private OperationTable operationTable;
-	
+	private OperationTableWidget operationTable;
+
 	/**
 	 * This is the entry point method.
 	 */
@@ -42,42 +36,33 @@ public class Calculator implements EntryPoint {
 		final Label errorLabel = new Label();
 		final TextField numberField = new TextField();
 		final Button sendNumberButton = new Button("Transform to binary");
-		
-		operationTable = new OperationTable();
+
+		operationTable = new OperationTableWidget();
 
 		// Binary test
 		RootPanel.get("numberFieldContainer").add(numberField);
 		RootPanel.get("sendNumberButtonContainer").add(sendNumberButton);
 		// Error label container
 		RootPanel.get("errorLabelContainer").add(errorLabel);
-		
-		// Operations Table content 
-		store = new ListStore<Operation>(props.key());
+
+		// Delete button
 		final TextButton refreshButton = new TextButton("Update table");
 		RootPanel.get("operationsTableRefresh").add(refreshButton);
 		RootPanel.get("operationsTable").add(operationTable);
-		
+
 		class BinaryButtonHandler implements ClickHandler, KeyUpHandler {
-			/**
-			 * Fired when the user clicks on the sendButton.
-			 */
+
 			public void onClick(ClickEvent event) {
-				sendNameToServer();
+				calculateBinaryNumber();
 			}
 
-			/**
-			 * Fired when the user types in the nameField.
-			 */
 			public void onKeyUp(KeyUpEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					sendNameToServer();
+					calculateBinaryNumber();
 				}
 			}
 
-			/**
-			 * Send the name from the nameField to the server and wait for a response.
-			 */
-			private void sendNameToServer() {
+			private void calculateBinaryNumber() {
 				// First, we validate the input.
 				errorLabel.setText("");
 				String textToServer = numberField.getText();
@@ -89,111 +74,47 @@ public class Calculator implements EntryPoint {
 					return;
 				}
 
-				// Then, we send the input to the server.
-				binaryService.getBinaryFormat(number, new AsyncCallback<String>() {
+				binaryService.getBinaryFormatOperation(number, new AsyncCallback<Operation>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						String errorMsg = "Error connecting to server: " + caught.getLocalizedMessage();
-					     MessageBox messageBox = new MessageBox(errorMsg);
-					     messageBox.show();						
+						MessageBox messageBox = new MessageBox(errorMsg);
+						messageBox.show();						
 					}
 
-					public void onSuccess(String result) {
-						refreshOptionsTable();
-					     MessageBox messageBox = new MessageBox("Binary value is " + result);
-					     messageBox.show();						
-						// Refresh table
-//						refreshButton.click();
-					     
+					public void onSuccess(Operation result) {
+						//operationTable.refreshTable();
+						MessageBox messageBox = new MessageBox("Binary value is " + result.getNumberBinary());
+						messageBox.show();						
+						operationTable.addOperation(result);
 					}
 				});
 			}
 		}
-		
+
 		class RefreshButtonHandler implements ClickHandler, KeyUpHandler {
-			/**
-			 * Fired when the user clicks on the sendButton.
-			 */
+
 			public void onClick(ClickEvent event) {
-				refreshOptionsTable();
+				operationTable.refreshTable();
 			}
 
-			/**
-			 * Fired when the user types in the nameField.
-			 */
 			public void onKeyUp(KeyUpEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					refreshOptionsTable();
+					operationTable.refreshTable();
 				}
 			}
-
-//			/**
-//			 * Send the name from the nameField to the server and wait for a response.
-//			 */
-//			private void refreshOptionsTable() {
-//				
-//				binaryService.list(new AsyncCallback<List<Operation>>() {
-//
-//					@Override
-//					public void onFailure(Throwable caught) {
-//						String errorMsg = "Error retrieving stored data from server: " + caught.getLocalizedMessage();
-//					     MessageBox messageBox = new MessageBox(errorMsg);
-//					     messageBox.show();						
-//					}
-//
-//					@Override
-//					public void onSuccess(List<Operation> result) {
-//						try {
-//							if (store.size() > 0) {
-//								store.clear();	
-//							}
-//							store.addAll(result);
-//							operationTable.setStore(result);
-//						} catch (Exception ex) {
-//							ex.printStackTrace();
-//						}
-//					}
-//				});
-//			}
+			
 		}
 
 		BinaryButtonHandler binaryHandler = new BinaryButtonHandler();
 		sendNumberButton.addClickHandler(binaryHandler);
 		numberField.addKeyUpHandler(binaryHandler);
-		
+
 		RefreshButtonHandler refreshButtonHandler = new RefreshButtonHandler();
 		refreshButton.addClickHandler(refreshButtonHandler);
-		
-		// Update operations table
-		refreshOptionsTable();
+
+		// Update operations table (read from DataStore)
+		operationTable.refreshTable();
 	}
-	
-	/**
-	 * Send the name from the nameField to the server and wait for a response.
-	 */
-	private void refreshOptionsTable() {
-		
-		binaryService.list(new AsyncCallback<List<Operation>>() {
 
-			@Override
-			public void onFailure(Throwable caught) {
-				String errorMsg = "Error retrieving stored data from server: " + caught.getLocalizedMessage();
-			     MessageBox messageBox = new MessageBox(errorMsg);
-			     messageBox.show();						
-			}
-
-			@Override
-			public void onSuccess(List<Operation> result) {
-				try {
-					if (store.size() > 0) {
-						store.clear();	
-					}
-					store.addAll(result);
-					operationTable.setStore(result);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		});
-	}	
 }
