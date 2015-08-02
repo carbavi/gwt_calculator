@@ -51,11 +51,11 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 		
 		if (panel == null) {
 			
-			ColumnConfig<Operation, Date> timestampCol = new ColumnConfig<Operation, Date>(props.timestamp(), 100, SafeHtmlUtils.fromTrustedString("<b>Date</b>"));
+			ColumnConfig<Operation, Date> timestampCol = new ColumnConfig<Operation, Date>(props.timestamp(), 150, SafeHtmlUtils.fromTrustedString("<b>Date</b>"));
 			ColumnConfig<Operation, Long> decimalNumberCol = new ColumnConfig<Operation, Long>(props.numberDecimal(), 150, "Decimal Number");
 			ColumnConfig<Operation, String> binaryNumberCol = new ColumnConfig<Operation, String>(props.numberBinary(), 150, "Binary Number");
 			ColumnConfig<Operation, String> deleteButtonCol = new ColumnConfig<Operation, String>(props.numberBinary(), 50, "Action");
-			timestampCol.setResizable(false);
+			timestampCol.setResizable(true);
 			deleteButtonCol.setResizable(false);
 
 			// Date cell format
@@ -117,7 +117,7 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 
 			panel = new ContentPanel();
 			panel.setHeadingText("Binary format transformation history");
-			panel.setPixelSize(450, 300);
+			panel.setPixelSize(600, 300);
 			panel.addStyleName("margin-10");
 
 			final Resizable resizable = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
