@@ -12,16 +12,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class BinaryTransformerServiceImpl extends RemoteServiceServlet implements BinaryTransformerService {
 
 	private OperationDaoService operationDaoService = new OperationDaoServiceImpl();
-	
-	@Override
-	public String getBinaryFormat(long input) throws IllegalArgumentException {
-		String binaryNumber = Long.toBinaryString(input);
-		Operation operation = new Operation();
-		operation.setNumberDecimal(input);
-		operation.setNumberBinary(binaryNumber);
-		operationDaoService.save(operation);
-		return binaryNumber;
-	}
 
 	@Override
 	public Operation getBinaryFormatOperation(long input) throws IllegalArgumentException {
@@ -32,7 +22,6 @@ public class BinaryTransformerServiceImpl extends RemoteServiceServlet implement
 		return operationDaoService.saveOperation(operation);
 	}
 
-	
 	@Override
 	public List<Operation> list() throws IllegalArgumentException {
 		return operationDaoService.list();
@@ -42,11 +31,5 @@ public class BinaryTransformerServiceImpl extends RemoteServiceServlet implement
 	public Boolean delete(Long id) throws IllegalArgumentException {
 		return operationDaoService.delete(id);
 	}
-
-	@Override
-	public Boolean delete(Operation op) throws IllegalArgumentException {
-		return operationDaoService.delete(op);
-	}
-
 
 }

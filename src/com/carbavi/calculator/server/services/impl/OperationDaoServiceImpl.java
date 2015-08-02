@@ -12,21 +12,9 @@ import com.carbavi.calculator.shared.Operation;
 
 public class OperationDaoServiceImpl implements OperationDaoService {
 	
-
-	
 	/**
-	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.save(Operation)}
+	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.saveOperation(Operation)}
 	 */
-	@Override
-	public void save(Operation operation) {
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.makePersistent(operation);
-		} finally {
-			pm.close();
-		}
-	}
-	
 	@Override
 	public Operation saveOperation(Operation operation) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -39,7 +27,22 @@ public class OperationDaoServiceImpl implements OperationDaoService {
 	}	
 
 	/**
-	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.delete(Operation)}
+	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.delete(Long)}
+	 */
+	@Override
+	public Boolean delete(Long id) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			Operation op = pm.getObjectById(Operation.class, id);
+			pm.deletePersistent(op);
+			return Boolean.TRUE;
+		} finally {
+			pm.close();
+		}
+	}
+
+	/**
+	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.list()}
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -56,33 +59,5 @@ public class OperationDaoServiceImpl implements OperationDaoService {
 		}
 		return list;
 	}
-
-	/**
-	 * See {@link com.carbavi.calculator.server.services.OperationDaoService.list()}
-	 */
-	@Override
-	public Boolean delete(Long id) {
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			//Object obj = pm.getObjectById(id);
-			Operation op = pm.getObjectById(Operation.class, id);
-			pm.deletePersistent(op);
-			return Boolean.TRUE;
-		} finally {
-			pm.close();
-		}
-	}
 	
-	@Override
-	public Boolean delete(Operation op) {
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(Operation.class, op.getId());
-			pm.deletePersistent(op);
-			return Boolean.TRUE;
-		} finally {
-			pm.close();
-		}
-	}	
-
 }

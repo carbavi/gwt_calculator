@@ -7,11 +7,11 @@ import com.carbavi.calculator.shared.Operation;
 public interface OperationDaoService {
 	
 	/**
-	 * Saves an {@code Operation} in the DataStore
+	 * Saves an {@code Operation} in the DataStore and returns the persisted object
 	 * 
-	 * @param operation to be saved
+	 * @param operation
+	 * @return
 	 */
-	void save(Operation operation);
 	Operation saveOperation(Operation operation);
 	
 	/**
@@ -21,12 +21,11 @@ public interface OperationDaoService {
 	 * @return {@literal true} if deleted successfully, {@literal false} otherwise
 	 */
 	Boolean delete(Long id);
-	Boolean delete(Operation op);
 	
 	/**
-	 * Returns the full list of {@code Operations} stored in the DataStore
+	 * Returns the full list of {@code Operation} stored in the DataStore
 	 * 
-	 * @return the full list of {@code Operations} stored in the DataStore
+	 * @return the full list of {@code Operation} stored in the DataStore
 	 */
 	List<Operation> list();
 

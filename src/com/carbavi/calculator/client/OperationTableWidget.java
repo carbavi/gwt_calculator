@@ -18,13 +18,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.TextButtonCell;
-import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
-import com.sencha.gxt.core.client.GXT;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.StringLabelProvider;
-import com.sencha.gxt.state.client.CookieProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
-import com.sencha.gxt.state.client.StateManager;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Resizable;
 import com.sencha.gxt.widget.core.client.Resizable.Dir;
@@ -37,7 +32,6 @@ import com.sencha.gxt.widget.core.client.event.ExpandEvent;
 import com.sencha.gxt.widget.core.client.event.ExpandEvent.ExpandHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
-import com.sencha.gxt.widget.core.client.form.SimpleComboBox;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -61,6 +55,8 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 			ColumnConfig<Operation, Long> decimalNumberCol = new ColumnConfig<Operation, Long>(props.numberDecimal(), 150, "Decimal Number");
 			ColumnConfig<Operation, String> binaryNumberCol = new ColumnConfig<Operation, String>(props.numberBinary(), 150, "Binary Number");
 			ColumnConfig<Operation, String> deleteButtonCol = new ColumnConfig<Operation, String>(props.numberBinary(), 50, "Action");
+			timestampCol.setResizable(false);
+			deleteButtonCol.setResizable(false);
 
 			// Date cell format
 			timestampCol.setCell(new DateCell(DateTimeFormat.getFormat("dd/MM/yyyy HH:mm:ss")));
@@ -102,11 +98,11 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 
 			grid = new Grid<Operation>(store, cm);
 			grid.setAllowTextSelection(true);
-			grid.getView().setAutoExpandColumn(timestampCol);
+			grid.getView().setAutoExpandColumn(binaryNumberCol);
 			grid.getView().setStripeRows(true);
 			grid.getView().setColumnLines(true);
 			grid.setBorders(false);
-			grid.setColumnReordering(true);
+			grid.setColumnReordering(false);
 
 			// Stage manager, turn on state management
 			grid.setStateful(true);
@@ -116,20 +112,12 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 			GridStateHandler<Operation> state = new GridStateHandler<Operation>(grid);
 			state.loadState();
 
-			SimpleComboBox<String> typeCombo = new SimpleComboBox<String>(new StringLabelProvider<String>());
-			typeCombo.setTriggerAction(TriggerAction.ALL);
-			typeCombo.setEditable(false);
-			typeCombo.setWidth(100);
-			typeCombo.add("Row");
-			typeCombo.add("Cell");
-			typeCombo.setValue("Row");
-
 			VerticalLayoutContainer con = new VerticalLayoutContainer();
 			con.add(grid, new VerticalLayoutData(1, 1));
 
 			panel = new ContentPanel();
 			panel.setHeadingText("Binary format transformation history");
-			panel.setPixelSize(600, 300);
+			panel.setPixelSize(450, 300);
 			panel.addStyleName("margin-10");
 
 			final Resizable resizable = new Resizable(panel, Dir.E, Dir.SE, Dir.S);
@@ -157,8 +145,6 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 
 	@Override
 	public void onModuleLoad() {
-		// State manager, initialize the state options
-		StateManager.get().setProvider(new CookieProvider("/", null, null, GXT.isSecure()));
 		RootPanel.get().add(asWidget());
 	}	
 
@@ -191,15 +177,24 @@ public class OperationTableWidget implements IsWidget, EntryPoint  {
 		});
 	}
 	
+	/**
+	 * Adds an {@value Operation} to the table
+	 * 
+	 * @param operation to be added to the table
+	 */
 	public void addOperation(Operation operation) {
 		store.add(operation);
 	}
 	
-	private void setStore(List<Operation> result) {
+	/**
+	 * Updates the table content with the retrieved data from the DataStore
+	 * 
+	 * @param operationList the list of operations retrieved from the DataStore
+	 */
+	private void setStore(List<Operation> operationList) {
 		this.store.clear();
-		this.store.addAll(result);
+		this.store.addAll(operationList);
 		grid.getView().refresh(false);
 	}
-	
 
 }
